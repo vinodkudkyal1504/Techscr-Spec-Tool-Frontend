@@ -9,6 +9,25 @@
   --btn2:#e9f1ff;
 }
 
+.btn.danger{
+  background:#dc2626;
+  color:#fff;
+}
+
+.editorTabs{
+  display:flex;
+  gap:10px;
+  padding:12px;
+  border-bottom:1px solid var(--line);
+}
+
+.formGrid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+  gap:12px;
+  padding:12px;
+}
+
 .logoImg{
   width:48px;
   height:48px;
@@ -202,4 +221,76 @@ body{
   outline:none;
   margin: 12px;
   white-space: pre;
+}
+
+/* --------- Editor-specific polish (new) --------- */
+.editorWrap{
+  padding: 6px 0 0;
+}
+
+.editorSectionTitle{
+  padding: 14px 12px 0;
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+.editorSectionTitle:first-child{
+  border-top: none;
+  padding-top: 12px;
+}
+
+.editorBlock{
+  padding: 12px;
+}
+.editorBlockTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding-bottom: 10px;
+}
+
+.editorCard{
+  padding-top: 44px; /* leave space for remove button */
+}
+.btnSmallDanger{
+  position:absolute;
+  right:10px;
+  top:10px;
+  padding:6px 10px;
+  border-radius:10px;
+}
+
+.editorFooter{
+  padding: 12px;
+  border-top: 1px solid var(--line);
+}
+
+/* --------- Modal scroll fix: scroll inside modal, not the page --------- */
+
+/* lock background scroll when modal open */
+body.modalOpen{
+  overflow: hidden;
+}
+
+/* ensure overlay itself doesn't scroll the page */
+.modal{
+  overflow: hidden;
+}
+
+/* modal card uses flex layout so body can scroll */
+.modalCard{
+  max-height: calc(100vh - 32px); /* keep inside viewport */
+  display: flex;
+  flex-direction: column;
+}
+
+/* header fixed, body scrollable */
+.modalHeader{
+  flex: 0 0 auto;
+}
+
+#modalBody{
+  flex: 1 1 auto;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }

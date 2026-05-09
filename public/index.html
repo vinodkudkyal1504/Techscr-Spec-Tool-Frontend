@@ -51,6 +51,7 @@
                         <button id="btnCopyJson" class="btn">Copy JSON</button>
                         <button id="btnCopyMd" class="btn">Copy Markdown</button>
                         <button id="btnEdit" class="btn secondary">Edit</button>
+                        <button id="btnDelete" class="btn danger">Delete</button>
                         <button id="btnNew" class="btn secondary">New</button>
                     </div>
                 </div>
@@ -74,8 +75,8 @@
     </div>
 
     <script>
-        // const API_BASE = "http://localhost:3000";
-        const API_BASE = "https://techscr-spec-tool.onrender.com";
+        const API_BASE = "http://localhost:3000";
+        // const API_BASE = "https://techscr-spec-tool.onrender.com";
         let phones = [];
         let selected = null;
 
@@ -107,26 +108,27 @@
             $("countHint").textContent = `${phones.length} phones`;
             renderList();
             if (selected) {
-                const still = phones.find(p => p.id === selected.id);
+                const still = phones.find((p) => p.id === selected.id);
                 if (!still) selectPhone(null);
             }
         }
 
         function minPrice(p) {
-            const prices = (p.variants || []).map(v => v.price_inr).filter(n => typeof n === "number");
+            const prices = (p.variants || []).map((v) => v.price_inr).filter((n) => typeof n === "number");
             return prices.length ? Math.min(...prices) : null;
         }
 
         function renderList() {
             const list = $("list");
             list.innerHTML = "";
-            phones.forEach(p => {
+            phones.forEach((p) => {
                 const item = document.createElement("button");
                 item.className = "listItem" + (selected?.id === p.id ? " active" : "");
                 const price = minPrice(p);
                 item.innerHTML = `
           <div class="liTitle">${p.brand} ${p.model}</div>
-          <div class="liSub">${p.specs?.performance?.soc || "SoC unknown"} • ${price ? `From ₹${price.toLocaleString("en-IN")}` : "Price unknown"}</div>
+          <div class="liSub">${p.specs?.performance?.soc || "SoC unknown"} • ${price ? `From ₹${price.toLocaleString("en-IN")}` : "Price unknown"
+                    }</div>
         `;
                 item.onclick = () => selectPhone(p);
                 list.appendChild(item);
@@ -180,24 +182,33 @@
 
             const price = minPrice(p);
             $("phoneTitle").textContent = `${p.brand} ${p.model}`;
-            $("phoneMeta").textContent =
-                `${p.specs?.performance?.soc || "SoC unknown"} • ${p.specs?.durability?.ip_rating || "IP ?"} • ${price ? `From ₹${price.toLocaleString("en-IN")}` : "Price unknown"}`;
+            $("phoneMeta").textContent = `${p.specs?.performance?.soc || "SoC unknown"} • ${p.specs?.durability?.ip_rating || "IP ?"} • ${price ? `From ₹${price.toLocaleString("en-IN")}` : "Price unknown"
+                }`;
 
             const s = p.specs || {};
-            const variants = (p.variants || []).map(v => {
-                const pr = typeof v.price_inr === "number" ? `₹${v.price_inr.toLocaleString("en-IN")}` : "—";
-                return `<div class="variantCard">
+            const variants =
+                (p.variants || [])
+                    .map((v) => {
+                        const pr = typeof v.price_inr === "number" ? `₹${v.price_inr.toLocaleString("en-IN")}` : "—";
+                        return `<div class="variantCard">
           <div class="variantTitle">${v.label || `${v.ram_gb}GB+${v.storage_gb}GB`}</div>
           <div class="variantMeta">${fmt(v.ram_type)} • ${fmt(v.storage_type)}<br/>Price: <b>${pr}</b></div>
         </div>`;
-            }).join("") || `<div class="muted">—</div>`;
+                    })
+                    .join("") || `<div class="muted">—</div>`;
 
-            const tests = (p.tests || []).map(t => {
-                const range = (typeof t.range_min === "number" || typeof t.range_max === "number")
-                    ? ` (range: ${fmt(t.range_min)}–${fmt(t.range_max)} ${fmt(t.unit)})` : "";
-                const temp = t.temp_c ? ` • Temp: Approximately ~${fmt(t.temp_c.approx_min)}–~${fmt(t.temp_c.approx_max)}°C` : "";
-                return `<li><b>${t.type}</b> — ${t.metric}: ${fmt(t.value)} ${fmt(t.unit)}${range}${t.settings ? ` • ${t.settings}` : ""}${temp}${t.source ? ` • Source: ${t.source}` : ""}</li>`;
-            }).join("") || `<li class="muted">—</li>`;
+            const tests =
+                (p.tests || [])
+                    .map((t) => {
+                        const range =
+                            typeof t.range_min === "number" || typeof t.range_max === "number"
+                                ? ` (range: ${fmt(t.range_min)}–${fmt(t.range_max)} ${fmt(t.unit)})`
+                                : "";
+                        const temp = t.temp_c ? ` • Temp: Approximately ~${fmt(t.temp_c.approx_min)}–~${fmt(t.temp_c.approx_max)}°C` : "";
+                        return `<li><b>${t.type}</b> — ${t.metric}: ${fmt(t.value)} ${fmt(t.unit)}${range}${t.settings ? ` • ${t.settings}` : ""}${temp}${t.source ? ` • Source: ${t.source}` : ""
+                            }</li>`;
+                    })
+                    .join("") || `<li class="muted">—</li>`;
 
             $("detail").innerHTML = `
         <div class="section">
@@ -210,13 +221,13 @@
                 ["Type", fmt(s.display?.type)],
                 ["Resolution", fmt(s.display?.resolution_class)],
                 ["Refresh rate", `${fmt(s.display?.refresh_hz)} Hz`],
-                ["Peak brightness", s.display?.peak_brightness_nits ? `${s.display.peak_brightness_nits} nits` : "—"]
+                ["Peak brightness", s.display?.peak_brightness_nits ? `${s.display.peak_brightness_nits} nits` : "—"],
             ])}
 
         ${group("Performance", [
                 ["SoC", fmt(s.performance?.soc)],
                 ["AnTuTu", fmtAntutu(s.performance?.antutu)],
-                ["Cooling", fmt(s.performance?.cooling)]
+                ["Cooling", fmt(s.performance?.cooling)],
             ])}
 
         ${group("Battery & Charging", [
@@ -224,7 +235,7 @@
                 ["Wired charging", s.battery?.wired_charging_w ? `${s.battery.wired_charging_w} W` : "—"],
                 ["Wireless charging", s.battery?.wireless_charging_w ? `${s.battery.wireless_charging_w} W` : "—"],
                 ["Reverse charging", s.battery?.reverse_charging_w ? `${s.battery.reverse_charging_w} W` : "—"],
-                ["Bypass charging", fmt(s.battery?.bypass_charging)]
+                ["Bypass charging", fmt(s.battery?.bypass_charging)],
             ])}
 
         ${group("Cameras (Structured)", [
@@ -233,21 +244,21 @@
                 ["Rear telephoto", cameraToText(s.cameras?.rear?.telephoto)],
                 ["Front", s.cameras?.front?.mp ? `${s.cameras.front.mp}MP` : "—"],
                 ["Rear video max", fmt(s.cameras?.video?.rear_max)],
-                ["Front video max", fmt(s.cameras?.video?.front_max)]
+                ["Front video max", fmt(s.cameras?.video?.front_max)],
             ])}
 
         ${group("Durability / Build", [
                 ["IP rating", fmt(s.durability?.ip_rating)],
                 ["MIL-STD", fmt(s.durability?.mil_std)],
                 ["Frame material", fmt(s.durability?.frame_material)],
-                ["Glass protection", fmt(s.durability?.protection_glass)]
+                ["Glass protection", fmt(s.durability?.protection_glass)],
             ])}
 
         ${group("Software", [
                 ["OS at launch", fmt(s.software?.os_at_launch)],
                 ["UI", fmt(s.software?.ui)],
                 ["OS updates (years)", fmt(s.software?.os_updates_years)],
-                ["Security updates (years)", fmt(s.software?.security_updates_years)]
+                ["Security updates (years)", fmt(s.software?.security_updates_years)],
             ])}
 
         <div class="section">
@@ -268,13 +279,26 @@
             $("modalTitle").textContent = title;
             $("modalBody").innerHTML = bodyHtml;
             $("modal").classList.remove("hidden");
+
+            // NEW: lock background scroll
+            document.body.classList.add("modalOpen");
         }
-        function closeModal() { $("modal").classList.add("hidden"); }
+
+        function closeModal() {
+            $("modal").classList.add("hidden");
+
+            // NEW: unlock background scroll
+            document.body.classList.remove("modalOpen");
+        }
         $("modalClose").onclick = closeModal;
-        $("modal").onclick = (e) => { if (e.target.id === "modal") closeModal(); };
+        $("modal").onclick = (e) => {
+            if (e.target.id === "modal") closeModal();
+        };
 
         $("btnAdmin").onclick = () => {
-            openModal("Admin Mode", `
+            openModal(
+                "Admin Mode",
+                `
         <div class="formRow">
           <label>Admin Key</label>
           <input id="key" class="input" placeholder="Enter your ADMIN_KEY" />
@@ -283,7 +307,8 @@
         <div style="padding:0 12px 12px;">
           <button id="enable" class="btn">Enable Admin</button>
         </div>
-      `);
+      `,
+            );
 
             $("enable").onclick = () => {
                 const key = $("key").value.trim();
@@ -292,7 +317,7 @@
                 sessionStorage.setItem("adminKey", adminKey);
                 setAdminUI();
                 closeModal();
-                alert("Admin enabled (admin APIs added next step)");
+                alert("Admin enabled");
             };
         };
 
@@ -325,7 +350,7 @@
             lines.push(`# ${p.brand} ${p.model}`);
             lines.push("");
             lines.push(`## Variants`);
-            (p.variants || []).forEach(v => {
+            (p.variants || []).forEach((v) => {
                 const pr = typeof v.price_inr === "number" ? `₹${v.price_inr.toLocaleString("en-IN")}` : "—";
                 lines.push(`- ${v.label || `${v.ram_gb}GB+${v.storage_gb}GB`}: ${pr} (${fmt(v.ram_type)} / ${fmt(v.storage_type)})`);
             });
@@ -337,7 +362,11 @@
             lines.push(`| AnTuTu | ${fmtAntutu(s.performance?.antutu)} |`);
             lines.push(`| Battery | ${fmt(s.battery?.capacity_mah)}mAh ${fmt(s.battery?.wired_charging_w)}W |`);
             lines.push(`| Durability | ${fmt(s.durability?.ip_rating)} ${s.durability?.mil_std ? `(${s.durability.mil_std})` : ""} |`);
-            lines.push(`| Cameras | Main: ${cameraToText(s.cameras?.rear?.main)}; Tele: ${cameraToText(s.cameras?.rear?.telephoto)}; UW: ${cameraToText(s.cameras?.rear?.ultrawide)} |`);
+            lines.push(
+                `| Cameras | Main: ${cameraToText(s.cameras?.rear?.main)}; Tele: ${cameraToText(s.cameras?.rear?.telephoto)}; UW: ${cameraToText(
+                    s.cameras?.rear?.ultrawide,
+                )} |`,
+            );
             lines.push(`| Video | Rear: ${fmt(s.cameras?.video?.rear_max)} / Front: ${fmt(s.cameras?.video?.front_max)} |`);
             lines.push(`| Software | ${fmt(s.software?.ui)} (${fmt(s.software?.os_at_launch)}) |`);
             return lines.join("\n");
@@ -353,36 +382,479 @@
             await copyText(toMarkdown(selected));
         };
 
-        // ---------- ADMIN: JSON editor modal ----------
-        function openJsonEditor(title, initialObj, onSave) {
-            openModal(title, `
-    <div class="muted small" style="padding:12px 12px 0;">
-      Edit the full JSON document. Required: <b>id</b>, <b>brand</b>, <b>model</b>.
-    </div>
-    <textarea id="jsonEditor" class="textarea" spellcheck="false">${JSON.stringify(initialObj, null, 2)}</textarea>
-    <div style="padding:0 12px 12px;">
-      <button id="saveJson" class="btn">Save</button>
-    </div>
-  `);
+        // ---------------- FULL ADMIN EDITOR (TABLE + JSON) ----------------
+        function deepGet(obj, path, fallback = "") {
+            return path.split(".").reduce((o, k) => (o && o[k] !== undefined ? o[k] : undefined), obj) ?? fallback;
+        }
 
-            $("saveJson").onclick = async () => {
-                try {
-                    const obj = JSON.parse($("jsonEditor").value);
-                    await onSave(obj);
-                    closeModal();
-                    await loadPhones($("search").value.trim());
-                    const updated = phones.find(p => p.id === obj.id);
-                    if (updated) selectPhone(updated);
-                    alert("Saved");
-                } catch (e) {
-                    alert(e.message);
-                }
+        function deepSet(obj, path, value) {
+            const keys = path.split(".");
+            let cur = obj;
+            for (let i = 0; i < keys.length - 1; i++) {
+                const k = keys[i];
+                if (cur[k] === undefined || cur[k] === null) cur[k] = {};
+                cur = cur[k];
+            }
+            cur[keys[keys.length - 1]] = value;
+        }
+
+        function ensureShape(phone) {
+            phone.release ||= { status: "released", date: null };
+            phone.variants = Array.isArray(phone.variants) ? phone.variants : [];
+            phone.tests = Array.isArray(phone.tests) ? phone.tests : [];
+            phone.specs ||= {};
+            phone.specs.display ||= {};
+            phone.specs.performance ||= {};
+            phone.specs.performance.antutu ||= {};
+            phone.specs.battery ||= {};
+            phone.specs.cameras ||= {};
+            phone.specs.cameras.rear ||= {};
+            phone.specs.cameras.rear.main ||= {};
+            phone.specs.cameras.rear.ultrawide ||= {};
+            phone.specs.cameras.rear.telephoto = phone.specs.cameras.rear.telephoto ?? null;
+            phone.specs.cameras.front ||= {};
+            phone.specs.cameras.video ||= {};
+            phone.specs.durability ||= {};
+            phone.specs.software ||= {};
+            phone.specs.connectivity ||= {};
+            phone.specs.audio ||= {};
+            phone.specs.extras ||= {};
+            return phone;
+        }
+
+        function inputRow(label, id, type = "text", value = "") {
+            const v = value === undefined || value === null ? "" : String(value);
+            return `
+      <div class="formRow">
+        <label>${label}</label>
+        <input id="${id}" class="input" type="${type}" value="${v.replaceAll('"', "&quot;")}">
+      </div>
+    `;
+        }
+
+        function checkboxRow(label, id, checked) {
+            return `
+      <div class="formRow">
+        <label>${label}</label>
+        <label style="display:flex;align-items:center;gap:10px;">
+          <input id="${id}" type="checkbox" ${checked ? "checked" : ""}>
+          <span class="muted small">Toggle</span>
+        </label>
+      </div>
+    `;
+        }
+
+        function sectionTitle(title) {
+            return `<div class="sectionTitle editorSectionTitle">${title}</div>`;
+        }
+
+        function variantsEditor(variants) {
+            const rows = variants
+                .map(
+                    (v, i) => `
+      <div class="variantCard editorCard" style="position:relative;">
+        <button data-variant-remove="${i}" class="btn danger btnSmallDanger">Remove</button>
+
+        <div class="formGrid" style="padding:0;">
+          ${inputRow("Label", `v_${i}_label`, "text", v.label || "")}
+          ${inputRow("RAM (GB)", `v_${i}_ram_gb`, "number", v.ram_gb ?? "")}
+          ${inputRow("Storage (GB)", `v_${i}_storage_gb`, "number", v.storage_gb ?? "")}
+          ${inputRow("RAM Type", `v_${i}_ram_type`, "text", v.ram_type || "")}
+          ${inputRow("Storage Type", `v_${i}_storage_type`, "text", v.storage_type || "")}
+          ${inputRow("Price (INR)", `v_${i}_price_inr`, "number", v.price_inr ?? "")}
+        </div>
+      </div>
+    `,
+                )
+                .join("");
+
+            return `
+      <div class="editorBlock">
+        <div class="editorBlockTop">
+          <div class="muted small">Add all variants & pricing here.</div>
+          <button id="addVariant" class="btn secondary">+ Add Variant</button>
+        </div>
+        <div class="variantsGrid">
+          ${rows || `<div class="muted">No variants. Click “Add Variant”.</div>`}
+        </div>
+      </div>
+    `;
+        }
+
+        function testsEditor(tests) {
+            const rows = tests
+                .map(
+                    (t, i) => `
+      <div class="variantCard editorCard" style="position:relative;">
+        <button data-test-remove="${i}" class="btn danger btnSmallDanger">Remove</button>
+
+        <div class="formGrid" style="padding:0;">
+          ${inputRow("Type", `t_${i}_type`, "text", t.type || "")}
+          ${inputRow("Metric", `t_${i}_metric`, "text", t.metric || "")}
+          ${inputRow("Value", `t_${i}_value`, "text", t.value ?? "")}
+          ${inputRow("Unit", `t_${i}_unit`, "text", t.unit || "")}
+          ${inputRow("Range Min", `t_${i}_range_min`, "number", t.range_min ?? "")}
+          ${inputRow("Range Max", `t_${i}_range_max`, "number", t.range_max ?? "")}
+          ${inputRow("Settings", `t_${i}_settings`, "text", t.settings || "")}
+          ${inputRow("Source", `t_${i}_source`, "text", t.source || "")}
+          ${inputRow("Temp Min (°C)", `t_${i}_temp_min`, "number", t.temp_c?.approx_min ?? "")}
+          ${inputRow("Temp Max (°C)", `t_${i}_temp_max`, "number", t.temp_c?.approx_max ?? "")}
+        </div>
+      </div>
+    `,
+                )
+                .join("");
+
+            return `
+      <div class="editorBlock">
+        <div class="editorBlockTop">
+          <div class="muted small">Add experience-layer tests (FPS, battery, temps, etc.).</div>
+          <button id="addTest" class="btn secondary">+ Add Test</button>
+        </div>
+        <div class="variantsGrid">
+          ${rows || `<div class="muted">No tests. Click “Add Test”.</div>`}
+        </div>
+      </div>
+    `;
+        }
+
+        function openEditor(title, initialObj, onSave) {
+            let working = ensureShape(structuredClone(initialObj));
+
+            openModal(
+                title,
+                `
+      <div class="editorTabs">
+        <button id="tabTable" class="btn secondary">Table View</button>
+        <button id="tabJson" class="btn secondary">JSON View</button>
+      </div>
+
+      <div id="editorContent"></div>
+    `,
+            );
+
+            let currentMode = "table";
+
+            function renderTableView() {
+                $("editorContent").innerHTML = `
+        <div class="editorWrap">
+
+          ${sectionTitle("Identity")}
+          <div class="formGrid">
+            ${inputRow("ID", "f_id", "text", working.id || "")}
+            ${inputRow("Brand", "f_brand", "text", working.brand || "")}
+            ${inputRow("Model", "f_model", "text", working.model || "")}
+            ${inputRow("Release Status", "f_rel_status", "text", deepGet(working, "release.status", ""))}
+            ${inputRow("Release Date (YYYY-MM-DD)", "f_rel_date", "text", deepGet(working, "release.date", ""))}
+          </div>
+
+          ${sectionTitle("Variants & Pricing")}
+          ${variantsEditor(working.variants)}
+
+          ${sectionTitle("Display")}
+          <div class="formGrid">
+            ${inputRow("Size (inches)", "s_display_size", "number", deepGet(working, "specs.display.size_in", ""))}
+            ${inputRow("Type", "s_display_type", "text", deepGet(working, "specs.display.type", ""))}
+            ${inputRow("Resolution Class", "s_display_res", "text", deepGet(working, "specs.display.resolution_class", ""))}
+            ${inputRow("Refresh Rate (Hz)", "s_display_hz", "number", deepGet(working, "specs.display.refresh_hz", ""))}
+            ${inputRow("Peak Brightness (nits)", "s_display_nits", "number", deepGet(working, "specs.display.peak_brightness_nits", ""))}
+          </div>
+
+          ${sectionTitle("Performance")}
+          <div class="formGrid">
+            ${inputRow("SoC", "s_perf_soc", "text", deepGet(working, "specs.performance.soc", ""))}
+            ${inputRow("AnTuTu approx", "s_perf_antutu", "number", deepGet(working, "specs.performance.antutu.approx", ""))}
+            ${inputRow("AnTuTu min", "s_perf_antutu_min", "number", deepGet(working, "specs.performance.antutu.approx_min", ""))}
+            ${inputRow("AnTuTu max", "s_perf_antutu_max", "number", deepGet(working, "specs.performance.antutu.approx_max", ""))}
+            ${inputRow("Cooling", "s_perf_cooling", "text", deepGet(working, "specs.performance.cooling", ""))}
+          </div>
+
+          ${sectionTitle("Battery & Charging")}
+          <div class="formGrid">
+            ${inputRow("Capacity (mAh)", "s_batt_cap", "number", deepGet(working, "specs.battery.capacity_mah", ""))}
+            ${inputRow("Wired Charging (W)", "s_batt_wired", "number", deepGet(working, "specs.battery.wired_charging_w", ""))}
+            ${inputRow("Wireless Charging (W)", "s_batt_wireless", "number", deepGet(working, "specs.battery.wireless_charging_w", ""))}
+            ${inputRow("Reverse Charging (W)", "s_batt_reverse", "number", deepGet(working, "specs.battery.reverse_charging_w", ""))}
+            ${checkboxRow("Bypass Charging", "s_batt_bypass", !!deepGet(working, "specs.battery.bypass_charging", false))}
+          </div>
+
+          ${sectionTitle("Cameras (Structured)")}
+          <div class="formGrid">
+            ${inputRow("Rear Main MP", "s_cam_rm_mp", "number", deepGet(working, "specs.cameras.rear.main.mp", ""))}
+            ${inputRow("Rear Main Sensor", "s_cam_rm_sensor", "text", deepGet(working, "specs.cameras.rear.main.sensor", ""))}
+            ${checkboxRow("Rear Main OIS", "s_cam_rm_ois", !!deepGet(working, "specs.cameras.rear.main.ois", false))}
+            ${inputRow("Rear Main Type", "s_cam_rm_type", "text", deepGet(working, "specs.cameras.rear.main.type", ""))}
+
+            ${inputRow("Rear Ultrawide MP", "s_cam_ruw_mp", "number", deepGet(working, "specs.cameras.rear.ultrawide.mp", ""))}
+            ${inputRow("Rear Ultrawide Sensor", "s_cam_ruw_sensor", "text", deepGet(working, "specs.cameras.rear.ultrawide.sensor", ""))}
+            ${checkboxRow("Rear Ultrawide OIS", "s_cam_ruw_ois", !!deepGet(working, "specs.cameras.rear.ultrawide.ois", false))}
+            ${inputRow("Rear Ultrawide Type", "s_cam_ruw_type", "text", deepGet(working, "specs.cameras.rear.ultrawide.type", ""))}
+
+            ${inputRow("Rear Telephoto MP", "s_cam_rt_mp", "number", deepGet(working, "specs.cameras.rear.telephoto.mp", ""))}
+            ${inputRow("Rear Telephoto Sensor", "s_cam_rt_sensor", "text", deepGet(working, "specs.cameras.rear.telephoto.sensor", ""))}
+            ${checkboxRow("Rear Telephoto OIS", "s_cam_rt_ois", !!deepGet(working, "specs.cameras.rear.telephoto.ois", false))}
+            ${inputRow("Rear Telephoto Type", "s_cam_rt_type", "text", deepGet(working, "specs.cameras.rear.telephoto.type", ""))}
+            ${inputRow("Rear Telephoto Optical Zoom (x)", "s_cam_rt_zoom", "number", deepGet(working, "specs.cameras.rear.telephoto.optical_zoom_x", ""))}
+
+            ${inputRow("Front MP", "s_cam_f_mp", "number", deepGet(working, "specs.cameras.front.mp", ""))}
+            ${inputRow("Rear Video Max", "s_cam_v_rear", "text", deepGet(working, "specs.cameras.video.rear_max", ""))}
+            ${inputRow("Front Video Max", "s_cam_v_front", "text", deepGet(working, "specs.cameras.video.front_max", ""))}
+          </div>
+
+          ${sectionTitle("Durability / Build")}
+          <div class="formGrid">
+            ${inputRow("IP Rating", "s_dur_ip", "text", deepGet(working, "specs.durability.ip_rating", ""))}
+            ${inputRow("MIL-STD", "s_dur_mil", "text", deepGet(working, "specs.durability.mil_std", ""))}
+            ${inputRow("Frame Material", "s_dur_frame", "text", deepGet(working, "specs.durability.frame_material", ""))}
+            ${inputRow("Glass Protection", "s_dur_glass", "text", deepGet(working, "specs.durability.protection_glass", ""))}
+          </div>
+
+          ${sectionTitle("Software")}
+          <div class="formGrid">
+            ${inputRow("OS at launch", "s_sw_os", "text", deepGet(working, "specs.software.os_at_launch", ""))}
+            ${inputRow("UI", "s_sw_ui", "text", deepGet(working, "specs.software.ui", ""))}
+            ${inputRow("OS updates (years)", "s_sw_osy", "number", deepGet(working, "specs.software.os_updates_years", ""))}
+            ${inputRow("Security updates (years)", "s_sw_secy", "number", deepGet(working, "specs.software.security_updates_years", ""))}
+          </div>
+
+          ${sectionTitle("Tests (Experience Layer)")}
+          ${testsEditor(working.tests)}
+
+          <div class="editorFooter">
+            <button id="saveTable" class="btn">Save</button>
+          </div>
+
+        </div>
+      `;
+
+                // add/remove variant
+                $("addVariant").onclick = () => {
+                    working.variants.push({
+                        label: "",
+                        ram_gb: null,
+                        storage_gb: null,
+                        ram_type: "",
+                        storage_type: "",
+                        price_inr: null,
+                    });
+                    renderTableView();
+                };
+
+                document.querySelectorAll("[data-variant-remove]").forEach((btn) => {
+                    btn.onclick = () => {
+                        const i = Number(btn.getAttribute("data-variant-remove"));
+                        working.variants.splice(i, 1);
+                        renderTableView();
+                    };
+                });
+
+                // add/remove tests
+                $("addTest").onclick = () => {
+                    working.tests.push({
+                        type: "",
+                        metric: "",
+                        value: "",
+                        unit: "",
+                        range_min: null,
+                        range_max: null,
+                        settings: "",
+                        source: "",
+                        temp_c: { approx_min: null, approx_max: null },
+                    });
+                    renderTableView();
+                };
+
+                document.querySelectorAll("[data-test-remove]").forEach((btn) => {
+                    btn.onclick = () => {
+                        const i = Number(btn.getAttribute("data-test-remove"));
+                        working.tests.splice(i, 1);
+                        renderTableView();
+                    };
+                });
+
+                $("saveTable").onclick = async () => {
+                    try {
+                        const updated = ensureShape(structuredClone(working));
+
+                        // Identity
+                        updated.id = $("f_id").value.trim();
+                        updated.brand = $("f_brand").value.trim();
+                        updated.model = $("f_model").value.trim();
+                        updated.release.status = $("f_rel_status").value.trim();
+                        updated.release.date = $("f_rel_date").value.trim() || null;
+
+                        // Display
+                        deepSet(updated, "specs.display.size_in", Number($("s_display_size").value) || null);
+                        deepSet(updated, "specs.display.type", $("s_display_type").value.trim());
+                        deepSet(updated, "specs.display.resolution_class", $("s_display_res").value.trim());
+                        deepSet(updated, "specs.display.refresh_hz", Number($("s_display_hz").value) || null);
+                        deepSet(updated, "specs.display.peak_brightness_nits", Number($("s_display_nits").value) || null);
+
+                        // Performance
+                        deepSet(updated, "specs.performance.soc", $("s_perf_soc").value.trim());
+                        deepSet(updated, "specs.performance.antutu.approx", Number($("s_perf_antutu").value) || null);
+                        deepSet(updated, "specs.performance.antutu.approx_min", Number($("s_perf_antutu_min").value) || null);
+                        deepSet(updated, "specs.performance.antutu.approx_max", Number($("s_perf_antutu_max").value) || null);
+                        deepSet(updated, "specs.performance.cooling", $("s_perf_cooling").value.trim());
+
+                        // Battery
+                        deepSet(updated, "specs.battery.capacity_mah", Number($("s_batt_cap").value) || null);
+                        deepSet(updated, "specs.battery.wired_charging_w", Number($("s_batt_wired").value) || null);
+                        deepSet(updated, "specs.battery.wireless_charging_w", Number($("s_batt_wireless").value) || null);
+                        deepSet(updated, "specs.battery.reverse_charging_w", Number($("s_batt_reverse").value) || null);
+                        deepSet(updated, "specs.battery.bypass_charging", $("s_batt_bypass").checked);
+
+                        // Cameras main
+                        deepSet(updated, "specs.cameras.rear.main.mp", Number($("s_cam_rm_mp").value) || null);
+                        deepSet(updated, "specs.cameras.rear.main.sensor", $("s_cam_rm_sensor").value.trim());
+                        deepSet(updated, "specs.cameras.rear.main.ois", $("s_cam_rm_ois").checked);
+                        deepSet(updated, "specs.cameras.rear.main.type", $("s_cam_rm_type").value.trim());
+
+                        // Cameras ultrawide
+                        deepSet(updated, "specs.cameras.rear.ultrawide.mp", Number($("s_cam_ruw_mp").value) || null);
+                        deepSet(updated, "specs.cameras.rear.ultrawide.sensor", $("s_cam_ruw_sensor").value.trim());
+                        deepSet(updated, "specs.cameras.rear.ultrawide.ois", $("s_cam_ruw_ois").checked);
+                        deepSet(updated, "specs.cameras.rear.ultrawide.type", $("s_cam_ruw_type").value.trim());
+
+                        // Telephoto optional: if all blank -> null
+                        const tpMp = $("s_cam_rt_mp").value.trim();
+                        const tpSensor = $("s_cam_rt_sensor").value.trim();
+                        const tpType = $("s_cam_rt_type").value.trim();
+                        const tpZoom = $("s_cam_rt_zoom").value.trim();
+                        const tpOis = $("s_cam_rt_ois").checked;
+                        const anyTp = tpMp || tpSensor || tpType || tpZoom || tpOis;
+
+                        if (!anyTp) {
+                            updated.specs.cameras.rear.telephoto = null;
+                        } else {
+                            updated.specs.cameras.rear.telephoto ||= {};
+                            deepSet(updated, "specs.cameras.rear.telephoto.mp", Number(tpMp) || null);
+                            deepSet(updated, "specs.cameras.rear.telephoto.sensor", tpSensor);
+                            deepSet(updated, "specs.cameras.rear.telephoto.ois", tpOis);
+                            deepSet(updated, "specs.cameras.rear.telephoto.type", tpType);
+                            deepSet(updated, "specs.cameras.rear.telephoto.optical_zoom_x", Number(tpZoom) || null);
+                        }
+
+                        deepSet(updated, "specs.cameras.front.mp", Number($("s_cam_f_mp").value) || null);
+                        deepSet(updated, "specs.cameras.video.rear_max", $("s_cam_v_rear").value.trim());
+                        deepSet(updated, "specs.cameras.video.front_max", $("s_cam_v_front").value.trim());
+
+                        // Durability
+                        deepSet(updated, "specs.durability.ip_rating", $("s_dur_ip").value.trim());
+                        deepSet(updated, "specs.durability.mil_std", $("s_dur_mil").value.trim());
+                        deepSet(updated, "specs.durability.frame_material", $("s_dur_frame").value.trim());
+                        deepSet(updated, "specs.durability.protection_glass", $("s_dur_glass").value.trim());
+
+                        // Software
+                        deepSet(updated, "specs.software.os_at_launch", $("s_sw_os").value.trim());
+                        deepSet(updated, "specs.software.ui", $("s_sw_ui").value.trim());
+                        deepSet(updated, "specs.software.os_updates_years", Number($("s_sw_osy").value) || null);
+                        deepSet(updated, "specs.software.security_updates_years", Number($("s_sw_secy").value) || null);
+
+                        // Variants list
+                        updated.variants = updated.variants.map((v, i) => ({
+                            label: $(`v_${i}_label`)?.value?.trim() || "",
+                            ram_gb: Number($(`v_${i}_ram_gb`)?.value) || null,
+                            storage_gb: Number($(`v_${i}_storage_gb`)?.value) || null,
+                            ram_type: $(`v_${i}_ram_type`)?.value?.trim() || "",
+                            storage_type: $(`v_${i}_storage_type`)?.value?.trim() || "",
+                            price_inr: Number($(`v_${i}_price_inr`)?.value) || null,
+                        }));
+
+                        // Tests list
+                        updated.tests = updated.tests.map((t, i) => {
+                            const tempMin = Number($(`t_${i}_temp_min`)?.value) || null;
+                            const tempMax = Number($(`t_${i}_temp_max`)?.value) || null;
+                            const hasTemp = tempMin !== null || tempMax !== null;
+
+                            return {
+                                type: $(`t_${i}_type`)?.value?.trim() || "",
+                                metric: $(`t_${i}_metric`)?.value?.trim() || "",
+                                value: $(`t_${i}_value`)?.value ?? "",
+                                unit: $(`t_${i}_unit`)?.value?.trim() || "",
+                                range_min: Number($(`t_${i}_range_min`)?.value) || null,
+                                range_max: Number($(`t_${i}_range_max`)?.value) || null,
+                                settings: $(`t_${i}_settings`)?.value?.trim() || "",
+                                source: $(`t_${i}_source`)?.value?.trim() || "",
+                                temp_c: hasTemp ? { approx_min: tempMin, approx_max: tempMax } : undefined,
+                            };
+                        });
+
+                        if (!updated.id || !updated.brand || !updated.model) {
+                            return alert("ID, Brand, and Model are required.");
+                        }
+
+                        await onSave(updated);
+                        closeModal();
+
+                        await loadPhones($("search").value.trim());
+                        const refreshed = phones.find((p) => p.id === updated.id);
+                        if (refreshed) selectPhone(refreshed);
+
+                        alert("Saved");
+                    } catch (e) {
+                        alert(e.message);
+                    }
+                };
+            }
+
+            function renderJsonView() {
+                $("editorContent").innerHTML = `
+        <div class="muted small" style="padding:12px 12px 0;">
+          Edit the full JSON document.
+        </div>
+
+        <textarea id="jsonEditor" class="textarea" spellcheck="false">${JSON.stringify(working, null, 2)}</textarea>
+
+        <div style="padding:0 12px 12px;">
+          <button id="saveJson" class="btn">Save</button>
+        </div>
+      `;
+
+                $("saveJson").onclick = async () => {
+                    try {
+                        const obj = ensureShape(JSON.parse($("jsonEditor").value));
+
+                        if (!obj.id || !obj.brand || !obj.model) {
+                            return alert("id, brand, model required.");
+                        }
+
+                        await onSave(obj);
+                        closeModal();
+
+                        await loadPhones($("search").value.trim());
+                        const updated = phones.find((p) => p.id === obj.id);
+                        if (updated) selectPhone(updated);
+
+                        alert("Saved");
+                    } catch (e) {
+                        alert(e.message);
+                    }
+                };
+            }
+
+            function renderEditor() {
+                if (currentMode === "json") renderJsonView();
+                else renderTableView();
+            }
+
+            $("tabTable").onclick = () => {
+                currentMode = "table";
+                renderEditor();
             };
+
+            $("tabJson").onclick = () => {
+                currentMode = "json";
+                renderEditor();
+            };
+
+            renderEditor();
         }
 
         $("btnNew").onclick = () => {
             if (!isAdmin()) return;
-            const empty = {
+
+            const empty = ensureShape({
                 id: "PH_BRAND_MODEL",
                 brand: "Brand",
                 model: "Model",
@@ -397,21 +869,43 @@
                     connectivity: {},
                     software: {},
                     audio: {},
-                    extras: {}
+                    extras: {},
                 },
-                tests: []
-            };
+                tests: [],
+            });
 
-            openJsonEditor("New Phone (JSON)", empty, async (obj) => {
+            openEditor("New Phone", empty, async (obj) => {
                 await api("/api/admin/phones", { method: "POST", body: JSON.stringify(obj) });
             });
         };
 
         $("btnEdit").onclick = () => {
             if (!isAdmin() || !selected) return;
-            openJsonEditor(`Edit: ${selected.brand} ${selected.model}`, selected, async (obj) => {
+            openEditor(`Edit: ${selected.brand} ${selected.model}`, selected, async (obj) => {
                 await api(`/api/admin/phones/${encodeURIComponent(obj.id)}`, { method: "PUT", body: JSON.stringify(obj) });
             });
+        };
+
+        $("btnDelete").onclick = async () => {
+            if (!isAdmin() || !selected) return;
+
+            const ok = confirm(`Delete ${selected.brand} ${selected.model}?`);
+            if (!ok) return;
+
+            try {
+                await api(`/api/admin/phones/${encodeURIComponent(selected.id)}`, {
+                    method: "DELETE",
+                });
+
+                alert("Phone deleted");
+
+                selected = null;
+
+                await loadPhones($("search").value.trim());
+                renderDetail(null);
+            } catch (e) {
+                alert(e.message);
+            }
         };
     </script>
 </body>
